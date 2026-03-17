@@ -27,7 +27,6 @@
         }
 
         .container { max-width: 500px; margin: 0 auto; }
-        
         .header { text-align: center; margin-bottom: 20px; }
         .header i { font-size: 50px; color: var(--primary-neon); }
 
@@ -38,7 +37,6 @@
         }
 
         label { display: block; margin: 15px 0 5px; color: var(--primary-neon); font-weight: bold; }
-        
         input, select, textarea {
             width: 100%; padding: 12px; background: rgba(0,0,0,0.3);
             border: 1px solid var(--border-color); border-radius: 10px;
@@ -63,10 +61,14 @@
             position: fixed; bottom: 0; left: 0; right: 0;
             background: #0a1120; display: flex; justify-content: space-around;
             padding: 15px; border-top: 1px solid var(--border-color);
+            z-index: 1000;
         }
 
-        .nav-item { color: var(--text-muted); text-align: center; font-size: 0.7em; text-decoration: none; cursor: pointer; }
+        .nav-item { color: var(--text-muted); text-align: center; font-size: 0.7em; text-decoration: none; cursor: pointer; flex: 1; }
         .nav-item.active { color: var(--primary-neon); }
+        
+        .secao { display: none; }
+        .secao.ativa { display: block; }
     </style>
 </head>
 <body>
@@ -78,7 +80,7 @@
             <p style="color: var(--text-muted); font-size: 0.8em;">GESTÃO TI SAÚDE</p>
         </div>
 
-        <div id="aba-agenda">
+        <div id="agenda" class="secao ativa">
             <div class="card-input">
                 <label><i class="fas fa-hospital"></i> UNIDADE / PSF:</label>
                 <input type="text" id="unidade" placeholder="Ex: PSF 09">
@@ -102,25 +104,33 @@
             <div id="listaChamados"></div>
         </div>
 
-        <div id="aba-relatorio" style="display:none; text-align:center; padding-top:50px;">
-            <h2>Relatórios</h2>
-            <p style="color:var(--text-muted)">Em desenvolvimento para a Secretaria de Saúde.</p>
+        <div id="relatorio" class="secao">
+            <h2 style="text-align:center; color: var(--primary-neon);">HISTÓRICO FINALIZADO</h2>
+            <div id="listaRelatorio"></div>
+        </div>
+
+        <div id="pedidos" class="secao">
+            <h2 style="text-align:center; color: var(--primary-neon);">PEDIDOS DE MATERIAIS</h2>
+            <p style="text-align:center; color: var(--text-muted);">Área para solicitação de toners, peças e periféricos.</p>
         </div>
     </div>
 
     <nav class="nav-bar">
-        <div class="nav-item active" onclick="mudarAba('agenda')"><i class="fas fa-list"></i><br>AGENDA</div>
-        <div class="nav-item" onclick="mudarAba('relatorio')"><i class="fas fa-file-medical"></i><br>RELATÓRIO</div>
-        <div class="nav-item"><i class="fas fa-box"></i><br>PEDIDOS</div>
+        <div class="nav-item active" onclick="mudarAba('agenda', this)"><i class="fas fa-list"></i><br>AGENDA</div>
+        <div class="nav-item" onclick="mudarAba('relatorio', this)"><i class="fas fa-file-medical"></i><br>RELATÓRIO</div>
+        <div class="nav-item" onclick="mudarAba('pedidos', this)"><i class="fas fa-box"></i><br>PEDIDOS</div>
     </nav>
 
     <script>
-        function mudarAba(aba) {
-            document.getElementById('aba-agenda').style.display = (aba === 'agenda') ? 'block' : 'none';
-            document.getElementById('aba-relatorio').style.display = (aba === 'relatorio') ? 'block' : 'none';
+        function mudarAba(abaId, elemento) {
+            // Esconde todas as seções
+            document.querySelectorAll('.secao').forEach(s => s.classList.remove('ativa'));
+            // Remove 'active' de todos os itens da nav
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            // Ativa a seção e o botão clicado
+            document.getElementById(abaId).classList.add('ativa');
+            elemento.classList.add('active');
         }
 
         function criarChamado() {
@@ -129,7 +139,7 @@
             const descricao = document.getElementById('descricao').value;
             
             if(!unidade || !descricao) {
-                alert("Preencha todos os campos!");
+                alert("Preencha os campos obrigatórios!");
                 return;
             }
 
@@ -147,12 +157,14 @@
                 <div style="margin: 5px 0; color: var(--text-muted); font-size: 0.85em;">Setor: ${setor}</div>
                 <div style="color: white;">${descricao}</div>
                 <div class="status-area"></div>
-                <div style="margin-top:15px; display:flex; gap:10px">
+                <div class="acoes" style="margin-top:15px; display:flex; gap:10px">
                     <button onclick="finalizar(this)" style="background:var(--success-neon); border:none; border-radius:8px; padding:10px; font-weight:bold; flex:1; cursor:pointer">Finalizar</button>
                     <button onclick="this.parentElement.parentElement.remove()" style="background:var(--danger-neon); border:none; border-radius:8px; padding:10px; color:white; font-weight:bold; flex:1; cursor:pointer">Excluir</button>
                 </div>
             `;
             document.getElementById('listaChamados').prepend(card);
+            
+            // Limpa campos
             document.getElementById('unidade').value = '';
             document.getElementById('descricao').value = '';
         }
@@ -160,9 +172,19 @@
         function finalizar(btn) {
             const agora = new Date();
             const horaFim = agora.getHours().toString().padStart(2, '0') + ':' + agora.getMinutes().toString().padStart(2, '0');
-            const status = btn.parentElement.parentElement.querySelector('.status-area');
+            const card = btn.parentElement.parentElement;
+            
+            // Adiciona a marca de finalização em vermelho
+            const status = card.querySelector('.status-area');
             status.innerHTML = `<span class="finalizado-time"><i class="fas fa-check-circle"></i> Finalizado às: ${horaFim}</span>`;
-            btn.style.display = 'none';
+            
+            // Remove os botões de ação para o relatório não ficar poluído
+            card.querySelector('.acoes').remove();
+            
+            // Move o card para a lista de relatórios
+            document.getElementById('listaRelatorio').prepend(card);
+            
+            alert("Chamado movido para Relatórios!");
         }
     </script>
 </body>
