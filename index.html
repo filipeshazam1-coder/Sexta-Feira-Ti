@@ -1,15 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <link rel="manifest" href="manifest.json">
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js');
-  }
-</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sexta-Feira TI</title>
+    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
@@ -36,10 +31,8 @@
         .header i { font-size: 50px; color: var(--primary-neon); }
 
         .card-input {
-            background: var(--bg-card);
-            padding: 20px; border-radius: 20px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 20px;
+            background: var(--bg-card); padding: 20px; border-radius: 20px;
+            border: 1px solid var(--border-color); margin-bottom: 20px;
         }
 
         label { display: block; margin: 15px 0 5px; color: var(--primary-neon); font-weight: bold; }
@@ -65,8 +58,7 @@
         .nav-bar {
             position: fixed; bottom: 0; left: 0; right: 0;
             background: #0a1120; display: flex; justify-content: space-around;
-            padding: 15px; border-top: 1px solid var(--border-color);
-            z-index: 1000;
+            padding: 15px; border-top: 1px solid var(--border-color); z-index: 1000;
         }
 
         .nav-item { color: var(--text-muted); text-align: center; font-size: 0.7em; cursor: pointer; flex: 1; }
@@ -74,10 +66,6 @@
         
         .secao { display: none; }
         .secao.ativa { display: block; }
-
-        .search-container { position: relative; margin-bottom: 15px; }
-        .search-container i { position: absolute; left: 12px; top: 12px; color: var(--primary-neon); }
-        .search-container input { padding-left: 35px; }
 
         .btn-card { border: none; padding: 8px; border-radius: 5px; font-weight: bold; cursor: pointer; flex: 1; }
     </style>
@@ -93,40 +81,31 @@
 
         <div id="agenda" class="secao ativa">
             <div class="card-input">
-                <label><i class="fas fa-hospital"></i> UNIDADE / PSF:</label>
+                <label>UNIDADE / PSF:</label>
                 <input type="text" id="unidade" placeholder="Ex: PSF 09">
-                
-                <label><i class="fas fa-layer-group"></i> SETOR:</label>
+                <label>SETOR:</label>
                 <select id="setor">
-                    <option>Administrativo</option>
-                    <option>Consultório</option>
-                    <option>Enfermagem</option>
-                    <option>Farmácia</option>
-                    <option>Recepção</option>
+                    <option>Administrativo</option><option>Consultório</option><option>Enfermagem</option><option>Farmácia</option><option>Recepção</option>
                 </select>
-
-                <label><i class="fas fa-tools"></i> DESCRIÇÃO:</label>
-                <textarea id="descricao" rows="3"></textarea>
+                <label>DESCRIÇÃO:</label>
+                <textarea id="descricao" rows="2"></textarea>
                 <button class="btn-acao" onclick="criarChamado()">AGENDAR</button>
             </div>
             <div id="listaChamados"></div>
         </div>
 
         <div id="relatorio" class="secao">
-            <div class="search-container">
-                <i class="fas fa-search"></i>
-                <input type="text" id="buscaRelatorio" placeholder="Pesquisar histórico..." onkeyup="filtrarRelatorio()">
-            </div>
+            <input type="text" id="busca" placeholder="Pesquisar..." onkeyup="renderizar()" style="margin-bottom:10px">
             <div id="listaRelatorio"></div>
         </div>
 
         <div id="pedidos" class="secao">
             <div class="card-input">
-                <label><i class="fas fa-map-marker-alt"></i> LOCAL DA ENTREGA:</label>
-                <input type="text" id="localPedido" placeholder="Ex: Almoxarifado Central">
-                <label><i class="fas fa-box-open"></i> ITEM SOLICITADO:</label>
-                <textarea id="itemPedido" rows="3"></textarea>
-                <button class="btn-acao" onclick="fazerPedido()">ENVIAR PEDIDO</button>
+                <label>LOCAL:</label>
+                <input type="text" id="localPedido">
+                <label>PEDIDO:</label>
+                <textarea id="itemPedido" rows="2"></textarea>
+                <button class="btn-acao" onclick="criarPedido()">ENVIAR PEDIDO</button>
             </div>
             <div id="listaPedidos"></div>
         </div>
@@ -139,99 +118,112 @@
     </nav>
 
     <script>
-        function mudarAba(abaId, elemento) {
+        // BANCO DE DADOS LOCAL
+        let chamados = JSON.parse(localStorage.getItem('chamados')) || [];
+        let pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
+
+        function mudarAba(id, el) {
             document.querySelectorAll('.secao').forEach(s => s.classList.remove('ativa'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(abaId).classList.add('ativa');
-            elemento.classList.add('active');
+            document.getElementById(id).classList.add('ativa');
+            el.classList.add('active');
+        }
+
+        function salvar() {
+            localStorage.setItem('chamados', JSON.stringify(chamados));
+            localStorage.setItem('pedidos', JSON.stringify(pedidos));
+            renderizar();
         }
 
         function criarChamado() {
-            const unidade = document.getElementById('unidade').value;
-            const setor = document.getElementById('setor').value;
-            const desc = document.getElementById('descricao').value;
-            if(!unidade || !desc) return alert("Preencha os campos!");
+            const u = document.getElementById('unidade').value;
+            const s = document.getElementById('setor').value;
+            const d = document.getElementById('descricao').value;
+            if(!u || !d) return alert("Preencha!");
 
             const agora = new Date();
-            const dataHora = agora.toLocaleDateString('pt-BR') + " | " + agora.getHours().toString().padStart(2, '0') + ":" + agora.getMinutes().toString().padStart(2, '0');
-
-            const card = document.createElement('div');
-            card.className = 'chamado-card';
-            card.innerHTML = `
-                <div style="display:flex; justify-content:space-between">
-                    <span style="font-weight:bold; color:var(--primary-neon)">${unidade}</span>
-                    <span class="agenda-time">${dataHora}</span>
-                </div>
-                <div style="font-size:0.8em; color:var(--text-muted)">Setor: ${setor}</div>
-                <div style="margin-top:5px" class="desc-text">${desc}</div>
-                <div class="status-area"></div>
-                <div class="acoes" style="margin-top:15px; display:flex; gap:10px">
-                    <button class="btn-card" onclick="finalizar(this)" style="background:var(--success-neon)">Finalizar</button>
-                    <button class="btn-card" onclick="this.parentElement.parentElement.remove()" style="background:var(--danger-neon); color:white">Excluir</button>
-                </div>
-            `;
-            document.getElementById('listaChamados').prepend(card);
+            chamados.push({
+                id: Date.now(),
+                unidade: u,
+                setor: s,
+                desc: d,
+                inicio: agora.toLocaleDateString() + " | " + agora.getHours().toString().padStart(2,'0') + ":" + agora.getMinutes().toString().padStart(2,'0'),
+                fim: null,
+                status: 'aberto'
+            });
             document.getElementById('unidade').value = ''; document.getElementById('descricao').value = '';
+            salvar();
         }
 
-        function finalizar(btn) {
-            const card = btn.parentElement.parentElement;
+        function finalizar(id) {
             const agora = new Date();
-            const dataFim = agora.toLocaleDateString('pt-BR');
-            const horaFim = agora.getHours().toString().padStart(2, '0') + ":" + agora.getMinutes().toString().padStart(2, '0');
-            
-            card.querySelector('.status-area').innerHTML = `
-                <span class="finalizado-full-time">
-                    <i class="fas fa-check-circle"></i> Finalizado em: ${dataFim} às ${horaFim}
-                </span>`;
-            
-            // Troca os botões para as opções de Relatório
-            card.querySelector('.acoes').innerHTML = `
-                <button class="btn-card" onclick="voltarParaAgenda(this)" style="background:var(--primary-neon)">Voltar p/ Agenda</button>
-                <button class="btn-card" onclick="this.parentElement.parentElement.remove()" style="background:var(--danger-neon); color:white">Excluir</button>
-            `;
-            
-            document.getElementById('listaRelatorio').prepend(card);
+            const index = chamados.findIndex(c => c.id === id);
+            chamados[index].fim = agora.toLocaleDateString() + " às " + agora.getHours().toString().padStart(2,'0') + ":" + agora.getMinutes().toString().padStart(2,'0');
+            chamados[index].status = 'finalizado';
+            salvar();
         }
 
-        function voltarParaAgenda(btn) {
-            const card = btn.parentElement.parentElement;
-            card.querySelector('.status-area').innerHTML = ''; // Remove o texto vermelho
-            
-            // Restaura os botões originais
-            card.querySelector('.acoes').innerHTML = `
-                <button class="btn-card" onclick="finalizar(this)" style="background:var(--success-neon)">Finalizar</button>
-                <button class="btn-card" onclick="this.parentElement.parentElement.remove()" style="background:var(--danger-neon); color:white">Excluir</button>
-            `;
-            
-            document.getElementById('listaChamados').prepend(card);
-            alert("Chamado restaurado para a Agenda!");
+        function excluir(id) {
+            chamados = chamados.filter(c => c.id !== id);
+            salvar();
         }
 
-        function filtrarRelatorio() {
-            const busca = document.getElementById('buscaRelatorio').value.toLowerCase();
-            const cards = document.getElementById('listaRelatorio').getElementsByClassName('chamado-card');
-            for (let card of cards) {
-                card.style.display = card.innerText.toLowerCase().includes(busca) ? "block" : "none";
-            }
+        function restaurar(id) {
+            const index = chamados.findIndex(c => c.id === id);
+            chamados[index].status = 'aberto';
+            chamados[index].fim = null;
+            salvar();
         }
 
-        function fazerPedido() {
-            const local = document.getElementById('localPedido').value;
-            const item = document.getElementById('itemPedido').value;
-            if(!local || !item) return alert("Preencha o pedido!");
-
-            const card = document.createElement('div');
-            card.className = 'chamado-card';
-            card.style.borderLeftColor = 'var(--success-neon)';
-            card.innerHTML = `
-                <div style="font-weight:bold; color:var(--success-neon)">PEDIDO: ${local}</div>
-                <div style="margin-top:5px">${item}</div>
-                <button onclick="this.parentElement.remove()" style="margin-top:10px; width:100%; background:none; border:1px solid var(--danger-neon); color:var(--danger-neon); padding:5px; border-radius:5px">Remover Pedido</button>
-            `;
-            document.getElementById('listaPedidos').prepend(card);
+        function criarPedido() {
+            const l = document.getElementById('localPedido').value;
+            const i = document.getElementById('itemPedido').value;
+            if(!l || !i) return;
+            pedidos.push({id: Date.now(), local: l, item: i});
             document.getElementById('localPedido').value = ''; document.getElementById('itemPedido').value = '';
+            salvar();
         }
+
+        function renderizar() {
+            const busca = document.getElementById('busca').value.toLowerCase();
+            const listaA = document.getElementById('listaChamados');
+            const listaR = document.getElementById('listaRelatorio');
+            const listaP = document.getElementById('listaPedidos');
+            
+            listaA.innerHTML = ''; listaR.innerHTML = ''; listaP.innerHTML = '';
+
+            chamados.slice().reverse().forEach(c => {
+                const html = `
+                    <div class="chamado-card">
+                        <div style="display:flex; justify-content:space-between">
+                            <span style="color:var(--primary-neon); font-weight:bold">${c.unidade}</span>
+                            <span class="agenda-time">${c.inicio}</span>
+                        </div>
+                        <div style="font-size:0.8em; color:var(--text-muted)">Setor: ${c.setor}</div>
+                        <div style="margin:5px 0">${c.desc}</div>
+                        ${c.fim ? `<span class="finalizado-full-time">Finalizado em: ${c.fim}</span>` : ''}
+                        <div style="display:flex; gap:10px; margin-top:10px">
+                            ${c.status === 'aberto' ? 
+                                `<button onclick="finalizar(${c.id})" style="background:var(--success-neon)" class="btn-card">Finalizar</button>` : 
+                                `<button onclick="restaurar(${c.id})" style="background:var(--primary-neon)" class="btn-card">Restaurar</button>`}
+                            <button onclick="excluir(${c.id})" style="background:var(--danger-neon); color:white" class="btn-card">Excluir</button>
+                        </div>
+                    </div>`;
+                
+                if(c.status === 'aberto') listaA.innerHTML += html;
+                else if(c.unidade.toLowerCase().includes(busca)) listaR.innerHTML += html;
+            });
+
+            pedidos.slice().reverse().forEach(p => {
+                listaP.innerHTML += `
+                    <div class="chamado-card" style="border-left-color:var(--success-neon)">
+                        <div style="color:var(--success-neon); font-weight:bold">PEDIDO: ${p.local}</div>
+                        <div>${p.item}</div>
+                        <button onclick="pedidos = pedidos.filter(x => x.id !== ${p.id}); salvar()" style="margin-top:10px; width:100%; background:none; border:1px solid var(--danger-neon); color:var(--danger-neon); border-radius:5px">Remover</button>
+                    </div>`;
+            });
+        }
+        renderizar();
     </script>
 </body>
 </html>
