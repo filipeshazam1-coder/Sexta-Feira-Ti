@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sexta-Feira TI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <style>
+        :root {
+            --bg-dark: #050a15;
+            --bg-card: #0f1a2d;
+            --primary-neon: #00d2ff;
+            --primary-glow: rgba(0, 210, 255, 0.4);
+            --success-neon: #00ff88;
+            --warning-neon: #ff9d00;
+            --danger-neon: #ff3366;
+            --text-main: #ffffff;
+            --text-muted: #88a0bc;
+            --border-color: #1e2f4d;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding-bottom: 90px;
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(145deg, #0f1a2d, #050a15);
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 2px solid var(--primary-neon);
+            box-shadow: 0 4px 20px rgba(0, 210, 255, 0.2);
+        }
+
+        .robot-icon {
+            font-size: 2.8em;
+            color: var(--primary-neon);
+            filter: drop-shadow(0 0 8px var(--primary-glow));
+            margin-bottom: 10px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(to right, #fff, var(--primary-neon));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* ABAS */
+        .tab-content { display: none; padding: 20px; animation: fadeIn 0.4s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* CARDS */
+        .card {
+            background-color: var(--bg-card);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .card h3 { color: var(--primary-neon); margin-top: 0; font-size: 1em; text-transform: uppercase; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+
+        /* INPUTS */
+        label { display: block; font-size: 0.8em; color: var(--text-muted); margin: 10px 0 5px; font-weight: bold; }
+        input, textarea {
+            width: 100%;
+            padding: 15px;
+            background-color: #050a15;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+        input:focus { border-color: var(--primary-neon); outline: none; box-shadow: 0 0 10px var(--primary-glow); }
+
+        /* BOTÕES */
+        .main-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+        .btn-add { background: linear-gradient(45deg, #00d2ff, #3a7bd5); }
+        .btn-pedido { background: linear-gradient(45deg, var(--warning-neon), #ff5f00); }
+
+        /* VOZ */
+        .voice-box { text-align: center; background: #050a15; padding: 15px; border-radius: 15px; border: 1px dashed var(--border-color); margin-bottom: 15px; }
+        #btn-voz { background: none; border: 3px solid var(--primary-neon); color: var(--primary-neon); width: 60px; height: 60px; border-radius: 50%; font-size: 1.5em; cursor: pointer; transition: 0.3s; }
+        #btn-voz.ouvindo { background: var(--danger-neon); border-color: #fff; box-shadow: 0 0 20px var(--danger-neon); animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+        /* LISTAS */
+        .card-item { border-left: 6px solid var(--primary-neon); position: relative; }
+        .card-finalizado { border-left-color: var(--success-neon); }
+        .action-btns { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-mini { flex: 1; padding: 10px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 0.8em; }
+        .btn-check { background: rgba(0, 255, 136, 0.2); color: var(--success-neon); border: 1px solid var(--success-neon); }
+        .btn-del { background: rgba(255, 51, 102, 0.2); color: var(--danger-neon); border: 1px solid var(--danger-neon); }
+        .btn-undo { background: rgba(0, 210, 255, 0.2); color: var(--primary-neon); border: 1px solid var(--primary-neon); }
+
+        /* NAV */
+        nav { position: fixed; bottom: 0; width: 100%; height: 80px; background: #0f1a2d; display: flex; border-top: 2px solid var(--border-color); z-index: 100; }
+        nav button { flex: 1; background: none; border: none; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.7em; font-weight: bold; }
+        nav button i { font-size: 1.5em; margin-bottom: 5px; }
+        nav button.active-nav { color: var(--primary-neon); }
+    </style>
+</head>
+<body>
+
+<header>
+    <i class="fas fa-robot robot-icon"></i>
+    <h1>Sexta-Feira</h1>
+    <p style="font-size: 0.7em; color: var(--primary-neon); letter-spacing: 2px;">GESTÃO TI SAÚDE</p>
+</header>
+
+<div id="tab-agenda" class="tab-content active">
+    <div class="card">
+        <div class="voice-box">
+            <button id="btn-voz" onclick="iniciarVoz()"><i class="fas fa-microphone"></i></button>
+            <p id="status-voz" style="font-size: 0.8em; margin-top: 10px; color: var(--text-muted);">Fale "Sexta-feira"</p>
+        </div>
+        <label>Unidade / PSF:</label>
+        <input type="text" id="id_unidade">
+        <label>Descrição do Chamado:</label>
+        <textarea id="setor_agenda"></textarea>
+        <button class="main-btn btn-add" onclick="adicionarAgenda()">Agendar</button>
+    </div>
+    <div id="lista-agenda"></div>
+</div>
+
+<div id="tab-relatorio" class="tab-content">
+    <div class="card" style="border-color: var(--primary-neon);">
+        <h3><i class="fas fa-search"></i> Pesquisar</h3>
+        <input type="text" id="busca_relatorio" onkeyup="filtrarRelatorio()">
+    </div>
+    <div id="lista-relatorio"></div>
+</div>
+
+<div id="tab-pedidos" class="tab-content">
+    <div class="card">
+        <h3><i class="fas fa-cart-plus"></i> Novo Pedido</h3>
+        <label>Local:</label>
+        <input type="text" id="local_pedido">
+        <label>Item:</label>
+        <textarea id="item_pedido"></textarea>
+        <button class="main-btn btn-pedido" onclick="adicionarPedido()">Gravar Pedido</button>
+    </div>
+    <div id="lista-pedidos"></div>
+</div>
+
+<nav>
+    <button id="nav-agenda" class="active-nav" onclick="changeTab('agenda')"><i class="fas fa-tasks"></i>AGENDA</button>
+    <button id="nav-relatorio" onclick="changeTab('relatorio')"><i class="fas fa-file-medical-alt"></i>RELATÓRIO</button>
+    <button id="nav-pedidos" onclick="changeTab('pedidos')"><i class="fas fa-box-open"></i>PEDIDOS</button>
+</nav>
+
+<script>
+    function changeTab(tab) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active-nav'));
+        document.getElementById('tab-' + tab).classList.add('active');
+        document.getElementById('nav-' + tab).classList.add('active-nav');
+    }
+
+    // VOZ
+    function iniciarVoz() {
+        const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!Recognition) return alert("Erro no microfone");
+        const rec = new Recognition();
+        rec.lang = 'pt-BR';
+        rec.onstart = () => { document.getElementById('btn-voz').classList.add('ouvindo'); };
+        rec.onresult = (e) => {
+            const t = e.results[0][0].transcript.toLowerCase();
+            document.getElementById('status-voz').innerText = t;
+            if(t.includes("sexta feira") || t.includes("sexta-feira")) {
+                if(t.includes("agenda")) changeTab('agenda');
+                if(t.includes("relatório")) changeTab('relatorio');
+                if(t.includes("pedido")) changeTab('pedidos');
+            }
+        };
+        rec.onend = () => { document.getElementById('btn-voz').classList.remove('ouvindo'); };
+        rec.start();
+    }
+
+    // LOGICA
+    function adicionarAgenda(l = null, s = null) {
+        const local = l || document.getElementById('id_unidade').value;
+        const setor = s || document.getElementById('setor_agenda').value;
+        const id = Date.now();
+        if(!local || !setor) return;
+        const html = `
+            <div class="card card-item" id="${id}" data-txt="${local.toLowerCase()}">
+                <strong>${local}</strong><p>${setor}</p>
+                <div class="action-btns">
+                    <button class="btn-mini btn-check" onclick="concluir('${id}','${local}','${setor}')">Finalizar</button>
+                    <button class="btn-mini btn-del" onclick="remover('${id}')">Excluir</button>
+                </div>
+            </div>`;
+        document.getElementById('lista-agenda').insertAdjacentHTML('afterbegin', html);
+        document.getElementById('id_unidade').value = ""; document.getElementById('setor_agenda').value = "";
+    }
+
+    function concluir(id, l, s) {
+        document.getElementById(id).remove();
+        const fim = new Date().toLocaleString('pt-BR');
+        const html = `
+            <div class="card card-item card-finalizado" id="rel-${id}" data-txt="${l.toLowerCase()}">
+                <strong>${l}</strong><p>${s}</p><small>Finalizado em: ${fim}</small>
+                <div class="action-btns">
+                    <button class="btn-mini btn-undo" onclick="voltar('${id}','${l}','${s}')">Voltar</button>
+                    <button class="btn-mini btn-del" onclick="remover('rel-${id}')">Excluir</button>
+                </div>
+            </div>`;
+        document.getElementById('lista-relatorio').insertAdjacentHTML('afterbegin', html);
+    }
+
+    function voltar(id, l, s) { document.getElementById('rel-'+id).remove(); adicionarAgenda(l, s); changeTab('agenda'); }
+    function remover(id) { if(confirm("Excluir?")) document.getElementById(id).remove(); }
+    function filtrarRelatorio() {
+        const b = document.getElementById('busca_relatorio').value.toLowerCase();
+        document.querySelectorAll('#lista-relatorio .card').forEach(i => {
+            i.style.display = i.getAttribute('data-txt').includes(b) ? "block" : "none";
+        });
+    }
+
+    function adicionarPedido() {
+        const l = document.getElementById('local_pedido').value;
+        const i = document.getElementById('item_pedido').value;
+        if(!i) return;
+        const id = "ped-"+Date.now();
+        const html = `<div class="card card-item" style="border-left-color:var(--warning-neon)" id="${id}"><strong>${l}</strong><p>${i}</p><button class="btn-mini btn-del" onclick="remover('${id}')">Excluir</button></div>`;
+        document.getElementById('lista-pedidos').insertAdjacentHTML('afterbegin', html);
+        document.getElementById('local_pedido').value = ""; document.getElementById('item_pedido').value = "";
+    }
+</script>
+</body>
+</html>
