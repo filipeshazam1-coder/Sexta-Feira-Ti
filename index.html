@@ -1,19 +1,10 @@
-[15:12, 17/03/2026] filipeshazam1: <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sexta-Feira TI</title>
-    
     <link rel="manifest" href="manifest.json">
-    <script>
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js')
-          .then(() => console.log("Modo Offline Ativado!"))
-          .catch(err => console.log("Erro no SW:", err));
-      }
-    </script>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
@@ -21,33 +12,8 @@
             --bg-dark: #050a15;
             --bg-card: #0f1a2d;
             --primary-neon: #00d2ff;
-           …
-[15:18, 17/03/2026] filipeshazam1: <!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sexta-Feira TI</title>
-    
-    <link rel="manifest" href="manifest.json">
-    <script>
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js')
-          .then(() => console.log("Modo Offline Ativado!"))
-          .catch(err => console.log("Erro no SW:", err));
-      }
-    </script>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <style>
-        :root {
-            --bg-dark: #050a15;
-            --bg-card: #0f1a2d;
-            --primary-neon: #00d2ff;
-            --primary-glow: rgba(0, 210, 255, 0.4);
-            --success-neon: #00ff88; /* Verde para Agenda */
-            --danger-neon: #ff3366;  /* Vermelho para Finalização */
+            --success-neon: #00ff88;
+            --danger-neon: #ff3366;
             --text-main: #ffffff;
             --text-muted: #88a0bc;
             --border-color: #1e2f4d;
@@ -56,119 +22,51 @@
         body {
             background-color: var(--bg-dark);
             color: var(--text-main);
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            padding: 20px;
-            padding-bottom: 80px;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0; padding: 20px; padding-bottom: 80px;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .header i {
-            font-size: 50px;
-            color: var(--primary-neon);
-            text-shadow: 0 0 15px var(--primary-glow);
-        }
-
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-        }
+        .container { max-width: 500px; margin: 0 auto; }
+        
+        .header { text-align: center; margin-bottom: 20px; }
+        .header i { font-size: 50px; color: var(--primary-neon); }
 
         .card-input {
             background: var(--bg-card);
-            padding: 20px;
-            border-radius: 20px;
+            padding: 20px; border-radius: 20px;
             border: 1px solid var(--border-color);
         }
 
-        label {
-            display: block;
-            margin: 15px 0 5px;
-            color: var(--primary-neon);
-            font-size: 0.9em;
-            font-weight: bold;
-        }
-
+        label { display: block; margin: 15px 0 5px; color: var(--primary-neon); font-weight: bold; }
+        
         input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            color: white;
-            box-sizing: border-box;
-            outline: none;
-            margin-bottom: 10px;
+            width: 100%; padding: 12px; background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color); border-radius: 10px;
+            color: white; box-sizing: border-box; margin-bottom: 10px;
         }
 
-        button.btn-agendar {
-            width: 100%;
-            padding: 15px;
-            margin-top: 15px;
-            background: linear-gradient(45deg, #00d2ff, #3a7bd5);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
+        .btn-agendar {
+            width: 100%; padding: 15px; background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+            border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer;
         }
 
         .chamado-card {
-            background: var(--bg-card);
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 15px;
-            border-left: 5px solid var(--primary-neon);
+            background: var(--bg-card); margin-top: 20px; padding: 15px;
+            border-radius: 15px; border-left: 5px solid var(--primary-neon);
         }
 
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* COR VERDE PARA DATA/HORA DA AGENDA */
-        .agenda-time {
-            color: var(--success-neon);
-            font-weight: bold;
-            font-size: 0.85em;
-        }
-
-        /* COR VERMELHA PARA HORA DA FINALIZAÇÃO */
-        .finalizado-time {
-            color: var(--danger-neon);
-            font-weight: bold;
-            font-size: 0.85em;
-            margin-top: 5px;
-            display: block;
-        }
+        .info-row { display: flex; justify-content: space-between; align-items: center; }
+        .agenda-time { color: var(--success-neon); font-weight: bold; font-size: 0.85em; }
+        .finalizado-time { color: var(--danger-neon); font-weight: bold; font-size: 0.85em; margin-top: 5px; display: block; }
 
         .nav-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #0a1120;
-            display: flex;
-            justify-content: space-around;
-            padding: 15px;
-            border-top: 1px solid var(--border-color);
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: #0a1120; display: flex; justify-content: space-around;
+            padding: 15px; border-top: 1px solid var(--border-color);
         }
 
-        .nav-item {
-            color: var(--text-muted);
-            text-align: center;
-            font-size: 0.7em;
-            text-decoration: none;
-        }
-
-        .nav-item.active {
-            color: var(--primary-neon);
-        }
+        .nav-item { color: var(--text-muted); text-align: center; font-size: 0.7em; text-decoration: none; cursor: pointer; }
+        .nav-item.active { color: var(--primary-neon); }
     </style>
 </head>
 <body>
@@ -176,94 +74,95 @@
     <div class="container">
         <div class="header">
             <i class="fas fa-robot"></i>
-            <h1 style="margin: 10px 0 5px; letter-spacing: 2px;">SEXTA-FEIRA</h1>
+            <h1 style="margin: 10px 0 5px;">SEXTA-FEIRA</h1>
             <p style="color: var(--text-muted); font-size: 0.8em;">GESTÃO TI SAÚDE</p>
         </div>
 
-        <div class="card-input">
-            <label><i class="fas fa-hospital"></i> UNIDADE / PSF:</label>
-            <input type="text" id="unidade" placeholder="Ex: PSF 09">
+        <div id="aba-agenda">
+            <div class="card-input">
+                <label><i class="fas fa-hospital"></i> UNIDADE / PSF:</label>
+                <input type="text" id="unidade" placeholder="Ex: PSF 09">
 
-            <label><i class="fas fa-layer-group"></i> SETOR:</label>
-            <select id="setor">
-                <option value="Administrativo">Administrativo</option>
-                <option value="Consultório Médico">Consultório Médico</option>
-                <option value="Enfermagem">Enfermagem</option>
-                <option value="Farmácia">Farmácia</option>
-                <option value="Odontologia">Odontologia</option>
-                <option value="Recepção">Recepção</option>
-                <option value="Vacinação">Vacinação</option>
-            </select>
+                <label><i class="fas fa-layer-group"></i> SETOR:</label>
+                <select id="setor">
+                    <option value="Administrativo">Administrativo</option>
+                    <option value="Consultório Médico">Consultório Médico</option>
+                    <option value="Enfermagem">Enfermagem</option>
+                    <option value="Farmácia">Farmácia</option>
+                    <option value="Odontologia">Odontologia</option>
+                    <option value="Recepção">Recepção</option>
+                    <option value="Vacinação">Vacinação</option>
+                </select>
 
-            <label><i class="fas fa-tools"></i> DESCRIÇÃO DO CHAMADO:</label>
-            <textarea id="descricao" rows="3" placeholder="O que precisa ser feito?"></textarea>
+                <label><i class="fas fa-tools"></i> DESCRIÇÃO:</label>
+                <textarea id="descricao" rows="3"></textarea>
 
-            <button class="btn-agendar" onclick="criarChamado()">AGENDAR</button>
+                <button class="btn-agendar" onclick="criarChamado()">AGENDAR</button>
+            </div>
+            <div id="listaChamados"></div>
         </div>
 
-        <div id="listaChamados"></div>
+        <div id="aba-relatorio" style="display:none; text-align:center; padding-top:50px;">
+            <h2>Relatórios</h2>
+            <p style="color:var(--text-muted)">Em desenvolvimento para a Secretaria de Saúde.</p>
+        </div>
     </div>
 
     <nav class="nav-bar">
-        <a href="#" class="nav-item active"><i class="fas fa-list"></i><br>AGENDA</a>
-        <a href="#" class="nav-item"><i class="fas fa-file-medical"></i><br>RELATÓRIO</a>
-        <a href="#" class="nav-item"><i class="fas fa-box"></i><br>PEDIDOS</a>
+        <div class="nav-item active" onclick="mudarAba('agenda')"><i class="fas fa-list"></i><br>AGENDA</div>
+        <div class="nav-item" onclick="mudarAba('relatorio')"><i class="fas fa-file-medical"></i><br>RELATÓRIO</div>
+        <div class="nav-item"><i class="fas fa-box"></i><br>PEDIDOS</div>
     </nav>
 
     <script>
+        function mudarAba(aba) {
+            document.getElementById('aba-agenda').style.display = (aba === 'agenda') ? 'block' : 'none';
+            document.getElementById('aba-relatorio').style.display = (aba === 'relatorio') ? 'block' : 'none';
+            
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+
         function criarChamado() {
             const unidade = document.getElementById('unidade').value;
             const setor = document.getElementById('setor').value;
             const descricao = document.getElementById('descricao').value;
             
             if(!unidade || !descricao) {
-                alert("Por favor, preencha os campos.");
+                alert("Preencha todos os campos!");
                 return;
             }
 
             const agora = new Date();
             const dataStr = agora.toLocaleDateString('pt-BR');
-            const horaStr = agora.getHours().toString().padStart(2, '0') + ':' + 
-                          agora.getMinutes().toString().padStart(2, '0');
+            const horaStr = agora.getHours().toString().padStart(2, '0') + ':' + agora.getMinutes().toString().padStart(2, '0');
 
-            const lista = document.getElementById('listaChamados');
             const card = document.createElement('div');
             card.className = 'chamado-card';
             card.innerHTML = `
                 <div class="info-row">
                     <span style="font-weight:bold; color:var(--primary-neon);">${unidade}</span>
-                    <span class="agenda-time">
-                        <i class="far fa-calendar-alt"></i> ${dataStr} | 
-                        <i class="far fa-clock"></i> ${horaStr}
-                    </span>
+                    <span class="agenda-time"><i class="far fa-calendar-alt"></i> ${dataStr} | <i class="far fa-clock"></i> ${horaStr}</span>
                 </div>
-                <div style="margin: 5px 0; color: var(--text-muted); font-size: 0.85em;">
-                    <i class="fas fa-map-marker-alt"></i> Setor: ${setor}
-                </div>
-                <div style="font-size: 0.95em; color: white;">${descricao}</div>
-                <div id="status-area"></div>
+                <div style="margin: 5px 0; color: var(--text-muted); font-size: 0.85em;">Setor: ${setor}</div>
+                <div style="color: white;">${descricao}</div>
+                <div class="status-area"></div>
                 <div style="margin-top:15px; display:flex; gap:10px">
-                    <button onclick="finalizarChamado(this)" style="background:var(--success-neon); border:none; border-radius:8px; padding:8px; color:black; font-weight:bold; cursor:pointer; flex: 1;">Finalizar</button>
-                    <button onclick="this.parentElement.parentElement.remove()" style="background:var(--danger-neon); border:none; border-radius:8px; padding:8px; color:white; font-weight:bold; cursor:pointer; flex: 1;">Excluir</button>
+                    <button onclick="finalizar(this)" style="background:var(--success-neon); border:none; border-radius:8px; padding:10px; font-weight:bold; flex:1; cursor:pointer">Finalizar</button>
+                    <button onclick="this.parentElement.parentElement.remove()" style="background:var(--danger-neon); border:none; border-radius:8px; padding:10px; color:white; font-weight:bold; flex:1; cursor:pointer">Excluir</button>
                 </div>
             `;
-            lista.prepend(card);
+            document.getElementById('listaChamados').prepend(card);
             document.getElementById('unidade').value = '';
             document.getElementById('descricao').value = '';
         }
 
-        function finalizarChamado(botao) {
+        function finalizar(btn) {
             const agora = new Date();
-            const horaFim = agora.getHours().toString().padStart(2, '0') + ':' + 
-                          agora.getMinutes().toString().padStart(2, '0');
-            
-            const card = botao.parentElement.parentElement;
-            const statusArea = card.querySelector('#status-area');
-            
-            // Adiciona a hora de finalização em VERMELHO
-            statusArea.innerHTML = <span class="finalizado-time"><i class="fas fa-check-circle"></i> Finalizado às: ${horaFim}</span>;
-            
-            botao.style.display = 'none'; // Esconde o botão finalizar após clicar
+            const horaFim = agora.getHours().toString().padStart(2, '0') + ':' + agora.getMinutes().toString().padStart(2, '0');
+            const status = btn.parentElement.parentElement.querySelector('.status-area');
+            status.innerHTML = `<span class="finalizado-time"><i class="fas fa-check-circle"></i> Finalizado às: ${horaFim}</span>`;
+            btn.style.display = 'none';
         }
     </script>
 </body>
