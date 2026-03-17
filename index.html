@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sexta-Feira TI</title>
-    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
@@ -34,6 +33,7 @@
             background: var(--bg-card);
             padding: 20px; border-radius: 20px;
             border: 1px solid var(--border-color);
+            margin-bottom: 20px;
         }
 
         label { display: block; margin: 15px 0 5px; color: var(--primary-neon); font-weight: bold; }
@@ -43,32 +43,35 @@
             color: white; box-sizing: border-box; margin-bottom: 10px;
         }
 
-        .btn-agendar {
+        .btn-acao {
             width: 100%; padding: 15px; background: linear-gradient(45deg, #00d2ff, #3a7bd5);
             border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer;
         }
 
         .chamado-card {
-            background: var(--bg-card); margin-top: 20px; padding: 15px;
+            background: var(--bg-card); margin-top: 15px; padding: 15px;
             border-radius: 15px; border-left: 5px solid var(--primary-neon);
         }
 
-        .info-row { display: flex; justify-content: space-between; align-items: center; }
         .agenda-time { color: var(--success-neon); font-weight: bold; font-size: 0.85em; }
-        .finalizado-time { color: var(--danger-neon); font-weight: bold; font-size: 0.85em; margin-top: 5px; display: block; }
+        .finalizado-time { color: var(--danger-neon); font-weight: bold; font-size: 0.85em; }
 
         .nav-bar {
             position: fixed; bottom: 0; left: 0; right: 0;
             background: #0a1120; display: flex; justify-content: space-around;
             padding: 15px; border-top: 1px solid var(--border-color);
-            z-index: 1000;
         }
 
-        .nav-item { color: var(--text-muted); text-align: center; font-size: 0.7em; text-decoration: none; cursor: pointer; flex: 1; }
+        .nav-item { color: var(--text-muted); text-align: center; font-size: 0.7em; cursor: pointer; flex: 1; }
         .nav-item.active { color: var(--primary-neon); }
         
         .secao { display: none; }
         .secao.ativa { display: block; }
+
+        /* Barra de Pesquisa */
+        .search-container { position: relative; margin-bottom: 15px; }
+        .search-container i { position: absolute; left: 12px; top: 12px; color: var(--primary-neon); }
+        .search-container input { padding-left: 35px; }
     </style>
 </head>
 <body>
@@ -84,34 +87,42 @@
             <div class="card-input">
                 <label><i class="fas fa-hospital"></i> UNIDADE / PSF:</label>
                 <input type="text" id="unidade" placeholder="Ex: PSF 09">
-
+                
                 <label><i class="fas fa-layer-group"></i> SETOR:</label>
                 <select id="setor">
-                    <option value="Administrativo">Administrativo</option>
-                    <option value="Consultório Médico">Consultório Médico</option>
-                    <option value="Enfermagem">Enfermagem</option>
-                    <option value="Farmácia">Farmácia</option>
-                    <option value="Odontologia">Odontologia</option>
-                    <option value="Recepção">Recepção</option>
-                    <option value="Vacinação">Vacinação</option>
+                    <option>Administrativo</option>
+                    <option>Consultório</option>
+                    <option>Enfermagem</option>
+                    <option>Farmácia</option>
+                    <option>Recepção</option>
                 </select>
 
                 <label><i class="fas fa-tools"></i> DESCRIÇÃO:</label>
                 <textarea id="descricao" rows="3"></textarea>
-
-                <button class="btn-agendar" onclick="criarChamado()">AGENDAR</button>
+                <button class="btn-acao" onclick="criarChamado()">AGENDAR</button>
             </div>
             <div id="listaChamados"></div>
         </div>
 
         <div id="relatorio" class="secao">
-            <h2 style="text-align:center; color: var(--primary-neon);">HISTÓRICO FINALIZADO</h2>
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" id="buscaRelatorio" placeholder="Pesquisar unidade ou setor..." onkeyup="filtrarRelatorio()">
+            </div>
             <div id="listaRelatorio"></div>
         </div>
 
         <div id="pedidos" class="secao">
-            <h2 style="text-align:center; color: var(--primary-neon);">PEDIDOS DE MATERIAIS</h2>
-            <p style="text-align:center; color: var(--text-muted);">Área para solicitação de toners, peças e periféricos.</p>
+            <div class="card-input">
+                <label><i class="fas fa-map-marker-alt"></i> LOCAL DA ENTREGA:</label>
+                <input type="text" id="localPedido" placeholder="Ex: Almoxarifado Central">
+                
+                <label><i class="fas fa-box-open"></i> ITEM SOLICITADO:</label>
+                <textarea id="itemPedido" rows="3" placeholder="Ex: 2 Toners Kyocera TK-1175"></textarea>
+                
+                <button class="btn-acao" onclick="fazerPedido()">ENVIAR PEDIDO</button>
+            </div>
+            <div id="listaPedidos"></div>
         </div>
     </div>
 
@@ -123,12 +134,8 @@
 
     <script>
         function mudarAba(abaId, elemento) {
-            // Esconde todas as seções
             document.querySelectorAll('.secao').forEach(s => s.classList.remove('ativa'));
-            // Remove 'active' de todos os itens da nav
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            
-            // Ativa a seção e o botão clicado
             document.getElementById(abaId).classList.add('ativa');
             elemento.classList.add('active');
         }
@@ -136,55 +143,63 @@
         function criarChamado() {
             const unidade = document.getElementById('unidade').value;
             const setor = document.getElementById('setor').value;
-            const descricao = document.getElementById('descricao').value;
-            
-            if(!unidade || !descricao) {
-                alert("Preencha os campos obrigatórios!");
-                return;
-            }
+            const desc = document.getElementById('descricao').value;
+            if(!unidade || !desc) return alert("Preencha tudo!");
 
             const agora = new Date();
-            const dataStr = agora.toLocaleDateString('pt-BR');
-            const horaStr = agora.getHours().toString().padStart(2, '0') + ':' + agora.getMinutes().toString().padStart(2, '0');
+            const dataHora = agora.toLocaleDateString('pt-BR') + " | " + agora.getHours().toString().padStart(2, '0') + ":" + agora.getMinutes().toString().padStart(2, '0');
 
             const card = document.createElement('div');
             card.className = 'chamado-card';
             card.innerHTML = `
-                <div class="info-row">
-                    <span style="font-weight:bold; color:var(--primary-neon);">${unidade}</span>
-                    <span class="agenda-time"><i class="far fa-calendar-alt"></i> ${dataStr} | <i class="far fa-clock"></i> ${horaStr}</span>
+                <div style="display:flex; justify-content:space-between">
+                    <span class="nome-unidade" style="font-weight:bold; color:var(--primary-neon)">${unidade}</span>
+                    <span class="agenda-time">${dataHora}</span>
                 </div>
-                <div style="margin: 5px 0; color: var(--text-muted); font-size: 0.85em;">Setor: ${setor}</div>
-                <div style="color: white;">${descricao}</div>
+                <div class="nome-setor" style="font-size:0.8em; color:var(--text-muted)">Setor: ${setor}</div>
+                <div style="margin-top:5px">${desc}</div>
                 <div class="status-area"></div>
-                <div class="acoes" style="margin-top:15px; display:flex; gap:10px">
-                    <button onclick="finalizar(this)" style="background:var(--success-neon); border:none; border-radius:8px; padding:10px; font-weight:bold; flex:1; cursor:pointer">Finalizar</button>
-                    <button onclick="this.parentElement.parentElement.remove()" style="background:var(--danger-neon); border:none; border-radius:8px; padding:10px; color:white; font-weight:bold; flex:1; cursor:pointer">Excluir</button>
+                <div class="acoes" style="margin-top:10px; display:flex; gap:10px">
+                    <button onclick="finalizar(this)" style="background:var(--success-neon); border:none; padding:8px; border-radius:5px; flex:1; font-weight:bold">Finalizar</button>
+                    <button onclick="this.parentElement.parentElement.remove()" style="background:var(--danger-neon); border:none; padding:8px; border-radius:5px; color:white; flex:1; font-weight:bold">Excluir</button>
                 </div>
             `;
             document.getElementById('listaChamados').prepend(card);
-            
-            // Limpa campos
-            document.getElementById('unidade').value = '';
-            document.getElementById('descricao').value = '';
+            document.getElementById('unidade').value = ''; document.getElementById('descricao').value = '';
         }
 
         function finalizar(btn) {
-            const agora = new Date();
-            const horaFim = agora.getHours().toString().padStart(2, '0') + ':' + agora.getMinutes().toString().padStart(2, '0');
             const card = btn.parentElement.parentElement;
-            
-            // Adiciona a marca de finalização em vermelho
-            const status = card.querySelector('.status-area');
-            status.innerHTML = `<span class="finalizado-time"><i class="fas fa-check-circle"></i> Finalizado às: ${horaFim}</span>`;
-            
-            // Remove os botões de ação para o relatório não ficar poluído
+            const hora = new Date().getHours().toString().padStart(2, '0') + ":" + new Date().getMinutes().toString().padStart(2, '0');
+            card.querySelector('.status-area').innerHTML = `<div class="finalizado-time"><i class="fas fa-check-circle"></i> Finalizado às: ${hora}</div>`;
             card.querySelector('.acoes').remove();
-            
-            // Move o card para a lista de relatórios
             document.getElementById('listaRelatorio').prepend(card);
-            
-            alert("Chamado movido para Relatórios!");
+        }
+
+        function filtrarRelatorio() {
+            const busca = document.getElementById('buscaRelatorio').value.toLowerCase();
+            const cards = document.getElementById('listaRelatorio').getElementsByClassName('chamado-card');
+            for (let card of cards) {
+                const texto = card.innerText.toLowerCase();
+                card.style.display = texto.includes(busca) ? "block" : "none";
+            }
+        }
+
+        function fazerPedido() {
+            const local = document.getElementById('localPedido').value;
+            const item = document.getElementById('itemPedido').value;
+            if(!local || !item) return alert("Preencha o pedido!");
+
+            const card = document.createElement('div');
+            card.className = 'chamado-card';
+            card.style.borderLeftColor = 'var(--success-neon)';
+            card.innerHTML = `
+                <div style="font-weight:bold; color:var(--success-neon)">PEDIDO: ${local}</div>
+                <div style="margin-top:5px; color:white">${item}</div>
+                <button onclick="this.parentElement.remove()" style="margin-top:10px; width:100%; background:none; border:1px solid var(--danger-neon); color:var(--danger-neon); padding:5px; border-radius:5px">Remover Pedido</button>
+            `;
+            document.getElementById('listaPedidos').prepend(card);
+            document.getElementById('localPedido').value = ''; document.getElementById('itemPedido').value = '';
         }
     </script>
 </body>
