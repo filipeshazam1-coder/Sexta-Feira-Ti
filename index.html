@@ -54,12 +54,13 @@
         }
 
         .agenda-time { color: var(--success-neon); font-weight: bold; font-size: 0.85em; }
-        .finalizado-time { color: var(--danger-neon); font-weight: bold; font-size: 0.85em; }
+        .finalizado-full-time { color: var(--danger-neon); font-weight: bold; font-size: 0.85em; margin-top: 8px; display: block; }
 
         .nav-bar {
             position: fixed; bottom: 0; left: 0; right: 0;
             background: #0a1120; display: flex; justify-content: space-around;
             padding: 15px; border-top: 1px solid var(--border-color);
+            z-index: 1000;
         }
 
         .nav-item { color: var(--text-muted); text-align: center; font-size: 0.7em; cursor: pointer; flex: 1; }
@@ -68,10 +69,11 @@
         .secao { display: none; }
         .secao.ativa { display: block; }
 
-        /* Barra de Pesquisa */
         .search-container { position: relative; margin-bottom: 15px; }
         .search-container i { position: absolute; left: 12px; top: 12px; color: var(--primary-neon); }
         .search-container input { padding-left: 35px; }
+
+        .btn-card { border: none; padding: 8px; border-radius: 5px; font-weight: bold; cursor: pointer; flex: 1; }
     </style>
 </head>
 <body>
@@ -107,7 +109,7 @@
         <div id="relatorio" class="secao">
             <div class="search-container">
                 <i class="fas fa-search"></i>
-                <input type="text" id="buscaRelatorio" placeholder="Pesquisar unidade ou setor..." onkeyup="filtrarRelatorio()">
+                <input type="text" id="buscaRelatorio" placeholder="Pesquisar histórico..." onkeyup="filtrarRelatorio()">
             </div>
             <div id="listaRelatorio"></div>
         </div>
@@ -116,10 +118,8 @@
             <div class="card-input">
                 <label><i class="fas fa-map-marker-alt"></i> LOCAL DA ENTREGA:</label>
                 <input type="text" id="localPedido" placeholder="Ex: Almoxarifado Central">
-                
                 <label><i class="fas fa-box-open"></i> ITEM SOLICITADO:</label>
-                <textarea id="itemPedido" rows="3" placeholder="Ex: 2 Toners Kyocera TK-1175"></textarea>
-                
+                <textarea id="itemPedido" rows="3"></textarea>
                 <button class="btn-acao" onclick="fazerPedido()">ENVIAR PEDIDO</button>
             </div>
             <div id="listaPedidos"></div>
@@ -144,7 +144,7 @@
             const unidade = document.getElementById('unidade').value;
             const setor = document.getElementById('setor').value;
             const desc = document.getElementById('descricao').value;
-            if(!unidade || !desc) return alert("Preencha tudo!");
+            if(!unidade || !desc) return alert("Preencha os campos!");
 
             const agora = new Date();
             const dataHora = agora.toLocaleDateString('pt-BR') + " | " + agora.getHours().toString().padStart(2, '0') + ":" + agora.getMinutes().toString().padStart(2, '0');
@@ -153,15 +153,15 @@
             card.className = 'chamado-card';
             card.innerHTML = `
                 <div style="display:flex; justify-content:space-between">
-                    <span class="nome-unidade" style="font-weight:bold; color:var(--primary-neon)">${unidade}</span>
+                    <span style="font-weight:bold; color:var(--primary-neon)">${unidade}</span>
                     <span class="agenda-time">${dataHora}</span>
                 </div>
-                <div class="nome-setor" style="font-size:0.8em; color:var(--text-muted)">Setor: ${setor}</div>
-                <div style="margin-top:5px">${desc}</div>
+                <div style="font-size:0.8em; color:var(--text-muted)">Setor: ${setor}</div>
+                <div style="margin-top:5px" class="desc-text">${desc}</div>
                 <div class="status-area"></div>
-                <div class="acoes" style="margin-top:10px; display:flex; gap:10px">
-                    <button onclick="finalizar(this)" style="background:var(--success-neon); border:none; padding:8px; border-radius:5px; flex:1; font-weight:bold">Finalizar</button>
-                    <button onclick="this.parentElement.parentElement.remove()" style="background:var(--danger-neon); border:none; padding:8px; border-radius:5px; color:white; flex:1; font-weight:bold">Excluir</button>
+                <div class="acoes" style="margin-top:15px; display:flex; gap:10px">
+                    <button class="btn-card" onclick="finalizar(this)" style="background:var(--success-neon)">Finalizar</button>
+                    <button class="btn-card" onclick="this.parentElement.parentElement.remove()" style="background:var(--danger-neon); color:white">Excluir</button>
                 </div>
             `;
             document.getElementById('listaChamados').prepend(card);
@@ -170,18 +170,43 @@
 
         function finalizar(btn) {
             const card = btn.parentElement.parentElement;
-            const hora = new Date().getHours().toString().padStart(2, '0') + ":" + new Date().getMinutes().toString().padStart(2, '0');
-            card.querySelector('.status-area').innerHTML = `<div class="finalizado-time"><i class="fas fa-check-circle"></i> Finalizado às: ${hora}</div>`;
-            card.querySelector('.acoes').remove();
+            const agora = new Date();
+            const dataFim = agora.toLocaleDateString('pt-BR');
+            const horaFim = agora.getHours().toString().padStart(2, '0') + ":" + agora.getMinutes().toString().padStart(2, '0');
+            
+            card.querySelector('.status-area').innerHTML = `
+                <span class="finalizado-full-time">
+                    <i class="fas fa-check-circle"></i> Finalizado em: ${dataFim} às ${horaFim}
+                </span>`;
+            
+            // Troca os botões para as opções de Relatório
+            card.querySelector('.acoes').innerHTML = `
+                <button class="btn-card" onclick="voltarParaAgenda(this)" style="background:var(--primary-neon)">Voltar p/ Agenda</button>
+                <button class="btn-card" onclick="this.parentElement.parentElement.remove()" style="background:var(--danger-neon); color:white">Excluir</button>
+            `;
+            
             document.getElementById('listaRelatorio').prepend(card);
+        }
+
+        function voltarParaAgenda(btn) {
+            const card = btn.parentElement.parentElement;
+            card.querySelector('.status-area').innerHTML = ''; // Remove o texto vermelho
+            
+            // Restaura os botões originais
+            card.querySelector('.acoes').innerHTML = `
+                <button class="btn-card" onclick="finalizar(this)" style="background:var(--success-neon)">Finalizar</button>
+                <button class="btn-card" onclick="this.parentElement.parentElement.remove()" style="background:var(--danger-neon); color:white">Excluir</button>
+            `;
+            
+            document.getElementById('listaChamados').prepend(card);
+            alert("Chamado restaurado para a Agenda!");
         }
 
         function filtrarRelatorio() {
             const busca = document.getElementById('buscaRelatorio').value.toLowerCase();
             const cards = document.getElementById('listaRelatorio').getElementsByClassName('chamado-card');
             for (let card of cards) {
-                const texto = card.innerText.toLowerCase();
-                card.style.display = texto.includes(busca) ? "block" : "none";
+                card.style.display = card.innerText.toLowerCase().includes(busca) ? "block" : "none";
             }
         }
 
@@ -195,7 +220,7 @@
             card.style.borderLeftColor = 'var(--success-neon)';
             card.innerHTML = `
                 <div style="font-weight:bold; color:var(--success-neon)">PEDIDO: ${local}</div>
-                <div style="margin-top:5px; color:white">${item}</div>
+                <div style="margin-top:5px">${item}</div>
                 <button onclick="this.parentElement.remove()" style="margin-top:10px; width:100%; background:none; border:1px solid var(--danger-neon); color:var(--danger-neon); padding:5px; border-radius:5px">Remover Pedido</button>
             `;
             document.getElementById('listaPedidos').prepend(card);
