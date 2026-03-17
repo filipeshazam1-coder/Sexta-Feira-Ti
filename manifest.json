@@ -1,0 +1,15 @@
+{
+  "name": "Sexta-Feira TI",
+  "short_name": "Sexta-Feira",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2593/2593635.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
